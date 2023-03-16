@@ -19,7 +19,6 @@ from data import anomaly_dataset
 from models import cvae_encoder, cvae_sampler, cvae_decoder
 
 from losses import vae_loss
-from callbacks import save_callback
 
 
 def train(train_image_dir_path, test_image_dir_path, epoch_size, step_size, batch_size, image_height, image_width,
@@ -47,7 +46,8 @@ def train(train_image_dir_path, test_image_dir_path, epoch_size, step_size, batc
     ## decoder
     decoder_model = cvae_decoder.decoder(sampler_model.outputs[0], shape_before_flattening, input_shape)
     ## optimizer
-    optimizer = tf.keras.optimizers.Adam(lr=0.0005)
+    encoder_optimizer = tf.keras.optimizers.Adam(learning_rate=0.0005)
+    decoder_optimizer = tf.keras.optimizers.Adam(learning_rate=0.0005)
 
     # train
     @tf.function
@@ -61,8 +61,8 @@ def train(train_image_dir_path, test_image_dir_path, epoch_size, step_size, batc
         gradients_of_enc = encoder.gradient(loss, encoder_model.trainable_variables)
         gradients_of_dec = decoder.gradient(loss, decoder_model.trainable_variables)
 
-        optimizer.apply_gradients(zip(gradients_of_enc, encoder_model.trainable_variables))
-        optimizer.apply_gradients(zip(gradients_of_dec, decoder_model.trainable_variables))
+        encoder_optimizer.apply_gradients(zip(gradients_of_enc, encoder_model.trainable_variables))
+        decoder_optimizer.apply_gradients(zip(gradients_of_dec, decoder_model.trainable_variables))
         return tf.reduce_sum(loss)
 
     for image_batch in iter(train_dataset):
