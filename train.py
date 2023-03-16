@@ -1,7 +1,5 @@
 import os
 import argparse
-import sys
-import time
 from datetime import datetime
 import pytz
 import tensorflow as tf
@@ -23,7 +21,10 @@ from losses import vae_loss
 from callbacks import draw_image_callbacks
 
 
-def train(train_image_dir_path, test_image_dir_path, epoch_size, step_size, batch_size, image_height, image_width,
+def train(train_image_dir_path, test_image_dir_path,
+          auroc_train_valid_raw_image_dir_path, auroc_train_valid_gt_image_dir_path,
+          auroc_valid_raw_image_dir_path, auroc_valid_gt_image_dir_path,
+          epoch_size, step_size, batch_size, image_height, image_width,
           latent_dim,
           test_max_sample, output_dir_path):
     input_shape = (image_height, image_width, 1)
@@ -106,8 +107,11 @@ def train(train_image_dir_path, test_image_dir_path, epoch_size, step_size, batc
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='train pb')
     parser.add_argument('--train_image_dir_path', type=str, default='~/.vaik-mnist-anomaly-dataset/train/raw/good')
-    parser.add_argument('--test_image_dir_path', type=str,
-                        default='~/.vaik-mnist-anomaly-dataset/valid/raw/good')
+    parser.add_argument('--test_image_dir_path', type=str, default='~/.vaik-mnist-anomaly-dataset/valid/raw/good')
+    parser.add_argument('--auroc_train_valid_raw_image_dir_path', type=str, default='~/.vaik-mnist-anomaly-dataset/train_valid/raw')
+    parser.add_argument('--auroc_train_valid_gt_image_dir_path', type=str, default='~/.vaik-mnist-anomaly-dataset/train_valid/ground_truth')
+    parser.add_argument('--auroc_valid_raw_image_dir_path', type=str, default='~/.vaik-mnist-anomaly-dataset/valid/raw')
+    parser.add_argument('--auroc_valid_gt_image_dir_path', type=str, default='~/.vaik-mnist-anomaly-dataset/valid/ground_truth')
     parser.add_argument('--epoch_size', type=int, default=100)
     parser.add_argument('--step_size', type=int, default=10000)
     parser.add_argument('--batch_size', type=int, default=32)
@@ -119,10 +123,17 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     args.train_image_dir_path = os.path.expanduser(args.train_image_dir_path)
+    args.auroc_train_valid_raw_image_dir_path = os.path.expanduser(args.auroc_train_valid_raw_image_dir_path)
+    args.auroc_train_valid_gt_image_dir_path = os.path.expanduser(args.auroc_train_valid_gt_image_dir_path)
+    args.auroc_valid_raw_image_dir_path = os.path.expanduser(args.auroc_valid_raw_image_dir_path)
+    args.auroc_valid_gt_image_dir_path = os.path.expanduser(args.auroc_valid_gt_image_dir_path)
     args.test_image_dir_path = os.path.expanduser(args.test_image_dir_path)
     args.output_dir_path = os.path.expanduser(args.output_dir_path)
 
     os.makedirs(os.path.dirname(args.output_dir_path), exist_ok=True)
 
-    train(args.train_image_dir_path, args.test_image_dir_path, args.epoch_size, args.step_size, args.batch_size,
+    train(args.train_image_dir_path, args.test_image_dir_path,
+          args.auroc_train_valid_raw_image_dir_path, args.auroc_train_valid_gt_image_dir_path,
+          args.auroc_valid_raw_image_dir_path, args.auroc_valid_gt_image_dir_path,
+          args.epoch_size, args.step_size, args.batch_size,
           args.image_height, args.image_width, args.latent_dim, args.test_max_sample, args.output_dir_path)
