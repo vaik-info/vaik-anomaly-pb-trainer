@@ -91,18 +91,24 @@ def train(train_image_dir_path, test_image_dir_path,
     for epoch in range(epoch_size):
         with tqdm.tqdm(range(step_size), unit="steps") as monitor_tqdm:
             for step in monitor_tqdm:
+                # train
                 monitor_tqdm.set_description(f"Epoch {epoch}")
                 image_batch = next(train_dataset)
                 train_loss, train_mse, train_generated_images = train_step(image_batch[0], image_batch[1])
                 monitor_tqdm.set_postfix(loss=float(train_loss), mse=float(train_mse))
+            # valid
             val_loss, val_mse, val_generated_images = test_step(valid_dataset[0], valid_dataset[1])
             print(f'testing, val_loss:{float(val_loss)}, val_mse:{float(val_mse)}')
 
+            # draw image
             save_model_sub_dir_path = os.path.join(save_model_dir_path, f'epoch-{epoch:04d}_steps-{step_size}_batch-{batch_size}')
             save_model_train_sub_dir_path = os.path.join(save_model_sub_dir_path, 'train_generated_images')
             draw_image_callbacks.draw_image_callback(image_batch[1].numpy(), train_generated_images.numpy(), save_model_train_sub_dir_path)
             save_model_val_sub_dir_path = os.path.join(save_model_sub_dir_path, 'val_generated_images')
             draw_image_callbacks.draw_image_callback(valid_dataset[1].numpy(), val_generated_images.numpy(), save_model_val_sub_dir_path)
+
+            # save model
+            all_model.save(os.path.join(save_model_sub_dir_path, 'all_model'))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='train pb')
@@ -112,7 +118,7 @@ if __name__ == '__main__':
     parser.add_argument('--auroc_train_valid_gt_image_dir_path', type=str, default='~/.vaik-mnist-anomaly-dataset/train_valid/ground_truth')
     parser.add_argument('--auroc_valid_raw_image_dir_path', type=str, default='~/.vaik-mnist-anomaly-dataset/valid/raw')
     parser.add_argument('--auroc_valid_gt_image_dir_path', type=str, default='~/.vaik-mnist-anomaly-dataset/valid/ground_truth')
-    parser.add_argument('--epoch_size', type=int, default=100)
+    parser.add_argument('--epoch_size', type=int, default=1000)
     parser.add_argument('--step_size', type=int, default=10000)
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--image_height', type=int, default=224)
