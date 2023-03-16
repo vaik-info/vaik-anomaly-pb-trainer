@@ -9,8 +9,6 @@ def __sampling_reparameterization(distribution_params):
 
 
 def prepare(mean_input, log_var_input):
-    mean = tf.keras.Input(shape=tf.keras.backend.int_shape(mean_input)[-1])
-    log_var = tf.keras.Input(shape=tf.keras.backend.int_shape(log_var_input)[-1])
-    out = tf.keras.layers.Lambda(__sampling_reparameterization)([mean, log_var])
-    model = tf.keras.Model([mean, log_var], out)
-    return model
+    z = tf.keras.layers.Lambda(__sampling_reparameterization)([mean_input, log_var_input])
+    model = tf.keras.Model([mean_input, log_var_input], z)
+    return model, z

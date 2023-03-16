@@ -42,11 +42,15 @@ def train(train_image_dir_path, test_image_dir_path, epoch_size, step_size, batc
 
     # Prepare Model
     ## encoder
-    encoder_model, shape_before_flattening = cvae_encoder.prepare(input_shape, latent_dim=latent_dim)
+    encoder_model, shape_before_flattening, (z_mean, z_log_var) = cvae_encoder.prepare(input_shape, latent_dim=latent_dim)
     ## sampler
-    sampler_model = cvae_sampler.prepare(mean_input=encoder_model.outputs[0], log_var_input=encoder_model.outputs[1])
+    sampler_model, z = cvae_sampler.prepare(mean_input=z_mean, log_var_input=z_log_var)
     ## decoder
-    decoder_model = cvae_decoder.decoder(sampler_model.outputs[0], shape_before_flattening, input_shape)
+    decoder_model, outputs = cvae_decoder.decoder(z, shape_before_flattening, input_shape)
+    ## all_model
+    all_model = tf.keras.Model(encoder_model.inputs, outputs)
+    all_model.summary()
+
     ## optimizer
     encoder_optimizer = tf.keras.optimizers.Adam(learning_rate=0.0005)
     decoder_optimizer = tf.keras.optimizers.Adam(learning_rate=0.0005)

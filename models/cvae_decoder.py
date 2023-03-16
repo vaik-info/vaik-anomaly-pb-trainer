@@ -2,9 +2,8 @@ import tensorflow as tf
 import numpy as np
 
 
-def decoder(decoder_input, shape_before_flattening, output_shape, filters=32):
-    inputs = tf.keras.Input(shape=tf.keras.backend.int_shape(decoder_input)[-1])
-    x = tf.keras.layers.Dense(np.prod(shape_before_flattening[1:]))(inputs)
+def decoder(z, shape_before_flattening, output_shape, filters=32):
+    x = tf.keras.layers.Dense(np.prod(shape_before_flattening[1:]))(z)
     x = tf.keras.layers.Reshape(shape_before_flattening[1:])(x)
 
     # conv-block-1
@@ -21,5 +20,5 @@ def decoder(decoder_input, shape_before_flattening, output_shape, filters=32):
     # conv-block-4
     outputs = tf.keras.layers.Conv2DTranspose(filters=output_shape[-1], kernel_size=3, strides=1, padding='same',
                                               activation='sigmoid')(x)
-    model = tf.keras.Model(inputs, outputs)
-    return model
+    model = tf.keras.Model(z, outputs)
+    return model, outputs

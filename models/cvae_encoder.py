@@ -26,4 +26,4 @@ def prepare(input_shape=(224, 224, 1), filters=32, latent_dim=2):
     z_log_var = tf.keras.layers.Dense(latent_dim)(x)
 
     model = tf.keras.Model(inputs, (z_mean, z_log_var), name="Encoder")
-    return model, shape_before_flattening
+    return model, shape_before_flattening, (z_mean, z_log_var)
