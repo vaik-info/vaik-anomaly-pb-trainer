@@ -105,9 +105,9 @@ def train(train_image_dir_path, test_image_dir_path, epoch_size, step_size, batc
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='train pb')
-    parser.add_argument('--train_image_dir_path', type=str, default='~/.vaik-mnist-anomaly-dataset/train/good')
+    parser.add_argument('--train_image_dir_path', type=str, default='~/.vaik-mnist-anomaly-dataset/train/raw/good')
     parser.add_argument('--test_image_dir_path', type=str,
-                        default='~/.vaik-mnist-anomaly-dataset/valid/anomaly/test/good')
+                        default='~/.vaik-mnist-anomaly-dataset/valid/raw/good')
     parser.add_argument('--epoch_size', type=int, default=100)
     parser.add_argument('--step_size', type=int, default=10000)
     parser.add_argument('--batch_size', type=int, default=32)
