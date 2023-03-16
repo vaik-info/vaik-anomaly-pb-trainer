@@ -19,8 +19,8 @@ if gpus:
 
 from data import anomaly_dataset
 from models import cvae_encoder, cvae_sampler, cvae_decoder
-
 from losses import vae_loss
+from callbacks import draw_image_callbacks
 
 
 def train(train_image_dir_path, test_image_dir_path, epoch_size, step_size, batch_size, image_height, image_width,
@@ -51,6 +51,9 @@ def train(train_image_dir_path, test_image_dir_path, epoch_size, step_size, batc
     encoder_optimizer = tf.keras.optimizers.Adam(learning_rate=0.0005)
     decoder_optimizer = tf.keras.optimizers.Adam(learning_rate=0.0005)
 
+    save_model_dir_path = os.path.join(output_dir_path,
+                                       f'{datetime.now(pytz.timezone("Asia/Tokyo")).strftime("%Y-%m-%d-%H-%M-%S")}')
+
     # train
     @tf.function
     def train_step(input_images, output_images):
@@ -58,14 +61,16 @@ def train(train_image_dir_path, test_image_dir_path, epoch_size, step_size, batc
             mean, log_var = encoder_model(input_images, training=True)
             latent = sampler_model([mean, log_var])
             generated_images = decoder_model(latent, training=True)
+
             loss = vae_loss.vae_loss(output_images, generated_images, mean, log_var)
+            mse = tf.keras.metrics.mse(tf.cast(output_images, tf.float32)/255., generated_images)
 
         gradients_of_enc = encoder.gradient(loss, encoder_model.trainable_variables)
         gradients_of_dec = decoder.gradient(loss, decoder_model.trainable_variables)
 
         encoder_optimizer.apply_gradients(zip(gradients_of_enc, encoder_model.trainable_variables))
         decoder_optimizer.apply_gradients(zip(gradients_of_dec, decoder_model.trainable_variables))
-        return tf.reduce_sum(loss)
+        return tf.reduce_sum(loss), tf.reduce_sum(mse), generated_images
 
     # test
     @tf.function
@@ -73,19 +78,26 @@ def train(train_image_dir_path, test_image_dir_path, epoch_size, step_size, batc
         mean, log_var = encoder_model(input_images, training=True)
         latent = sampler_model([mean, log_var])
         generated_images = decoder_model(latent, training=True)
+
         loss = vae_loss.vae_loss(output_images, generated_images, mean, log_var)
-        return tf.reduce_sum(loss)
+        mse = tf.keras.metrics.mse(tf.cast(output_images, tf.float32)/255., generated_images)
+        return tf.reduce_sum(loss), tf.reduce_sum(mse), generated_images
 
     for epoch in range(epoch_size):
         with tqdm.tqdm(range(step_size), unit="steps") as monitor_tqdm:
             for step in monitor_tqdm:
                 monitor_tqdm.set_description(f"Epoch {epoch}")
                 image_batch = next(train_dataset)
-                loss = train_step(image_batch[0], image_batch[1])
-                monitor_tqdm.set_postfix(loss=float(loss))
-            val_loss = test_step(valid_dataset[0], valid_dataset[1])
-            print(f'testing, val_loss:{val_loss}')
+                train_loss, train_mse, train_generated_images = train_step(image_batch[0], image_batch[1])
+                monitor_tqdm.set_postfix(loss=float(train_loss), mse=float(train_mse))
+            val_loss, val_mse, val_generated_images = test_step(valid_dataset[0], valid_dataset[1])
+            print(f'testing, val_loss:{float(val_loss)}, val_mse:{float(val_mse)}')
 
+            save_model_sub_dir_path = os.path.join(save_model_dir_path, f'epoch-{epoch:04d}_steps-{step_size}_batch-{batch_size}')
+            save_model_train_sub_dir_path = os.path.join(save_model_sub_dir_path, 'train_generated_images')
+            draw_image_callbacks.draw_image_callback(image_batch[1].numpy(), train_generated_images.numpy(), save_model_train_sub_dir_path)
+            save_model_val_sub_dir_path = os.path.join(save_model_sub_dir_path, 'val_generated_images')
+            draw_image_callbacks.draw_image_callback(valid_dataset[1].numpy(), val_generated_images.numpy(), save_model_val_sub_dir_path)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='train pb')
@@ -93,11 +105,11 @@ if __name__ == '__main__':
     parser.add_argument('--test_image_dir_path', type=str,
                         default='~/.vaik-mnist-anomaly-dataset/valid/anomaly/test/good')
     parser.add_argument('--epoch_size', type=int, default=100)
-    parser.add_argument('--step_size', type=int, default=1000)
+    parser.add_argument('--step_size', type=int, default=100)
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--image_height', type=int, default=224)
     parser.add_argument('--image_width', type=int, default=224)
-    parser.add_argument('--latent_dim', type=int, default=2)
+    parser.add_argument('--latent_dim', type=int, default=32)
     parser.add_argument('--test_max_sample', type=int, default=100)
     parser.add_argument('--output_dir_path', type=str, default='~/.vaik_anomaly_pb_trainer/output')
     args = parser.parse_args()

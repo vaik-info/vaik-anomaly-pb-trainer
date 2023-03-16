@@ -10,7 +10,7 @@ def prepare(input_shape=(224, 224, 1), filters=32, latent_dim=2):
     x = tf.keras.layers.ReLU()(x)
 
     # conv-block-2-3
-    for i in range(3):
+    for i in range(4):
         x = tf.keras.layers.Conv2D(filters=filters, kernel_size=3, strides=2, padding='same')(x)
         x = tf.keras.layers.BatchNormalization()(x)
         x = tf.keras.layers.ReLU()(x)
