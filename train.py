@@ -1,9 +1,11 @@
 import os
 import argparse
+import sys
 import time
 from datetime import datetime
 import pytz
 import tensorflow as tf
+import tqdm
 
 gpus = tf.config.list_physical_devices('GPU')
 if gpus:
@@ -29,8 +31,8 @@ def train(train_image_dir_path, test_image_dir_path, epoch_size, step_size, batc
     ## train
     TrainDataset = type(f'TrainDataset', (anomaly_dataset.AnomalyDataset,), dict())
     train_dataset = TrainDataset(train_image_dir_path, input_shape)
-    train_dataset = train_dataset.padded_batch(batch_size=batch_size, padding_values=(
-        tf.constant(0, dtype=tf.uint8), tf.constant(0, dtype=tf.uint8)))
+    train_dataset = iter(train_dataset.padded_batch(batch_size=batch_size, padding_values=(
+        tf.constant(0, dtype=tf.uint8), tf.constant(0, dtype=tf.uint8))))
 
     ## valid
     TestDataset = type(f'TestDataset', (anomaly_dataset.AnomalyDataset,), dict())
@@ -65,9 +67,24 @@ def train(train_image_dir_path, test_image_dir_path, epoch_size, step_size, batc
         decoder_optimizer.apply_gradients(zip(gradients_of_dec, decoder_model.trainable_variables))
         return tf.reduce_sum(loss)
 
-    for image_batch in iter(train_dataset):
-        loss = train_step(image_batch[0], image_batch[1])
-        print(f'{loss}')
+    # test
+    @tf.function
+    def test_step(input_images, output_images):
+        mean, log_var = encoder_model(input_images, training=True)
+        latent = sampler_model([mean, log_var])
+        generated_images = decoder_model(latent, training=True)
+        loss = vae_loss.vae_loss(output_images, generated_images, mean, log_var)
+        return tf.reduce_sum(loss)
+
+    for epoch in range(epoch_size):
+        with tqdm.tqdm(range(step_size), unit="steps") as monitor_tqdm:
+            for step in monitor_tqdm:
+                monitor_tqdm.set_description(f"Epoch {epoch}")
+                image_batch = next(train_dataset)
+                loss = train_step(image_batch[0], image_batch[1])
+                monitor_tqdm.set_postfix(loss=float(loss))
+            val_loss = test_step(valid_dataset[0], valid_dataset[1])
+            print(f'testing, val_loss:{val_loss}')
 
 
 if __name__ == '__main__':
