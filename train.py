@@ -109,11 +109,11 @@ if __name__ == '__main__':
     parser.add_argument('--test_image_dir_path', type=str,
                         default='~/.vaik-mnist-anomaly-dataset/valid/anomaly/test/good')
     parser.add_argument('--epoch_size', type=int, default=100)
-    parser.add_argument('--step_size', type=int, default=100)
+    parser.add_argument('--step_size', type=int, default=10000)
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--image_height', type=int, default=224)
     parser.add_argument('--image_width', type=int, default=224)
-    parser.add_argument('--latent_dim', type=int, default=32)
+    parser.add_argument('--latent_dim', type=int, default=128)
     parser.add_argument('--test_max_sample', type=int, default=100)
     parser.add_argument('--output_dir_path', type=str, default='~/.vaik_anomaly_pb_trainer/output')
     args = parser.parse_args()
