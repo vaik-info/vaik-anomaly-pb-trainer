@@ -133,10 +133,10 @@ def train(train_image_dir_path, test_image_dir_path,
             valid_full_pixel_instance_auroc, _ = calc_auroc.full_pixel_auroc(auroc_valid_inf_image_array, auroc_valid_gt_image_array)
             valid_anomaly_pixel_instance_auroc, _ = calc_auroc.anomaly_pixel_auroc(auroc_valid_inf_image_array, auroc_valid_gt_image_array)
 
-            print(f'train_instance_auroc(mean): {train_valid_mean_instance_auroc}, valid_instance_auroc(mean): {valid_mean_instance_auroc}')
-            print(f'train_instance_auroc(max): {train_valid_max_instance_auroc}, valid_instance_auroc(max): {valid_max_instance_auroc}')
-            print(f'train_full_pixel_auroc: {train_valid_full_pixel_instance_auroc}, valid_full_pixel_auroc: {valid_full_pixel_instance_auroc}')
-            print(f'train_anomaly_pixel_auroc: {train_valid_anomaly_pixel_instance_auroc}, valid_anomaly_pixel_auroc: {valid_anomaly_pixel_instance_auroc}')
+            print(f'train_instance_auroc(mean): {train_valid_mean_instance_auroc:.4f}, valid_instance_auroc(mean): {valid_mean_instance_auroc:.4f}')
+            print(f'train_instance_auroc(max): {train_valid_max_instance_auroc:.4f}, valid_instance_auroc(max): {valid_max_instance_auroc:.4f}')
+            print(f'train_full_pixel_auroc: {train_valid_full_pixel_instance_auroc:.4f}, valid_full_pixel_auroc: {valid_full_pixel_instance_auroc:.4f}')
+            print(f'train_anomaly_pixel_auroc: {train_valid_anomaly_pixel_instance_auroc:.4f}, valid_anomaly_pixel_auroc: {valid_anomaly_pixel_instance_auroc:.4f}')
 
             # draw image
             save_model_sub_dir_path = os.path.join(save_model_dir_path,
@@ -162,7 +162,7 @@ if __name__ == '__main__':
     parser.add_argument('--auroc_valid_gt_image_dir_path', type=str,
                         default='~/.vaik-mnist-anomaly-dataset/valid/ground_truth')
     parser.add_argument('--epoch_size', type=int, default=1000)
-    parser.add_argument('--step_size', type=int, default=2500)
+    parser.add_argument('--step_size', type=int, default=10000)
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--image_height', type=int, default=224)
     parser.add_argument('--image_width', type=int, default=224)
