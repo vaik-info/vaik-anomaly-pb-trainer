@@ -167,7 +167,7 @@ if __name__ == '__main__':
     parser.add_argument('--auroc_valid_gt_image_dir_path', type=str,
                         default='~/.vaik-mnist-anomaly-dataset/valid/ground_truth')
     parser.add_argument('--epoch_size', type=int, default=1000)
-    parser.add_argument('--step_size', type=int, default=10000)
+    parser.add_argument('--step_size', type=int, default=2500)
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--image_height', type=int, default=224)
     parser.add_argument('--image_width', type=int, default=224)
