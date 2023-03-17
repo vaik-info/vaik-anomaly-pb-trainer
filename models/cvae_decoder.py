@@ -7,7 +7,7 @@ def decoder(z, shape_before_flattening, output_shape, filters=32):
     x = tf.keras.layers.Reshape(shape_before_flattening[1:])(x)
 
     # conv-block-1-4
-    for i in range(4):
+    for i in range(3):
         x = tf.keras.layers.Conv2DTranspose(filters=filters*2, kernel_size=3, strides=2, padding='same')(x)
         x = tf.keras.layers.BatchNormalization()(x)
         x = tf.keras.layers.ReLU()(x)

@@ -145,7 +145,7 @@ def train(train_image_dir_path, test_image_dir_path,
 
             # draw image
             save_model_sub_dir_path = os.path.join(save_model_dir_path,
-                                                   f'epoch-{epoch:04d}_steps-{step_size}_batch-{batch_size}_loss-{train_loss:.4f}_val_loss-{val_loss:.4f}-train_full_pixel_auroc-{train_valid_full_pixel_instance_auroc:.4f}_valid_full_pixel_auroc-{valid_full_pixel_instance_auroc:.4f}')
+                                                   f'epoch-{epoch:04d}_steps-{step_size}_batch-{batch_size}_loss-{float(np.mean(train_loss_list)):.4f}_val_loss-{val_loss:.4f}-train_full_pixel_auroc-{train_valid_full_pixel_instance_auroc:.4f}_valid_full_pixel_auroc-{valid_full_pixel_instance_auroc:.4f}')
             save_model_train_sub_dir_path = os.path.join(save_model_sub_dir_path, 'train_generated_images')
             draw_image.draw_image(image_batch[1].numpy(), train_generated_images.numpy(), save_model_train_sub_dir_path)
             save_model_val_sub_dir_path = os.path.join(save_model_sub_dir_path, 'val_generated_images')
@@ -167,11 +167,11 @@ if __name__ == '__main__':
     parser.add_argument('--auroc_valid_gt_image_dir_path', type=str,
                         default='~/.vaik-mnist-anomaly-dataset/valid/ground_truth')
     parser.add_argument('--epoch_size', type=int, default=1000)
-    parser.add_argument('--step_size', type=int, default=2500)
+    parser.add_argument('--step_size', type=int, default=10000)
     parser.add_argument('--batch_size', type=int, default=32)
-    parser.add_argument('--image_height', type=int, default=224)
-    parser.add_argument('--image_width', type=int, default=224)
-    parser.add_argument('--latent_dim', type=int, default=128)
+    parser.add_argument('--image_height', type=int, default=128)
+    parser.add_argument('--image_width', type=int, default=128)
+    parser.add_argument('--latent_dim', type=int, default=64)
     parser.add_argument('--test_max_sample', type=int, default=100)
     parser.add_argument('--output_dir_path', type=str, default='~/.vaik_anomaly_pb_trainer/output')
     args = parser.parse_args()
