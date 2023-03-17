@@ -3,7 +3,7 @@ import numpy as np
 import os
 
 
-def draw_image_callback(y_true, y_pred, output_dir_path, rescale=255.):
+def draw_image(y_true, y_pred, output_dir_path, rescale=255.):
     os.makedirs(output_dir_path, exist_ok=True)
     for index in range(y_true.shape[0]):
         ground_truth_image, generated_image = y_true[index], y_pred[index]

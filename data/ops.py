@@ -9,13 +9,13 @@ import tensorflow_addons as tfa
 import numpy as np
 
 
-def read_image_dir(input_dir_path, target_shape: Tuple[int, int] = (256, 256)):
+def read_image_dir(input_dir_path, target_shape: Tuple[int, int, int] = (256, 256, 1)):
     image_path_list = []
     for file in ('*.jpg', '*.jpeg', '*.png', '*.JPG', '*.JPEG', '*.PNG'):
         image_path_list.extend(glob.glob(os.path.join(input_dir_path, '**', f'{file}'), recursive=True))
     image_path_list = sorted(image_path_list)
 
-    image_array = np.zeros((len(image_path_list),) + target_shape + (3,), dtype=np.uint8)
+    image_array = np.zeros((len(image_path_list),) + target_shape, dtype=np.uint8)
     padding_bottom_right_list = []
     org_image_shape_list = []
     for image_index, image_path in enumerate(image_path_list):
@@ -28,7 +28,9 @@ def read_image_dir(input_dir_path, target_shape: Tuple[int, int] = (256, 256)):
 def read_image(image_path: str, target_shape: Tuple[int, int] = (256, 256)):
     pil_image = Image.open(image_path).convert('L')
     pil_image, padding_bottom_right, org_image_shape = __resize_and_pad(pil_image, target_shape)
-    return np.asarray(pil_image), padding_bottom_right, org_image_shape
+    np_image = np.asarray(pil_image)
+    np_image = np.expand_dims(np_image, axis=-1) if len(np_image.shape)==2 else np_image
+    return np_image, padding_bottom_right, org_image_shape
 
 
 def decode(anomaly_scores, padding_bottom_right_list, model_input_size, feature_extractor_model_output_size):

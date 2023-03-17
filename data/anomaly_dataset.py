@@ -38,5 +38,5 @@ class AnomalyDataset:
         while True:
             image_path = random.choice(cls.image_path_list)
             input_image, _, _ = ops.read_image(image_path, (cls.image_shape[0], cls.image_shape[1]))
-            input_image = tf.convert_to_tensor(np.expand_dims(input_image, axis=-1).astype(np.uint8))
+            input_image = tf.convert_to_tensor(input_image.astype(np.uint8))
             yield input_image, input_image
