@@ -148,8 +148,18 @@ def train(train_image_dir_path, test_image_dir_path,
                                                    f'epoch-{epoch:04d}_steps-{step_size}_batch-{batch_size}_loss-{float(np.mean(train_loss_list)):.4f}_val_loss-{val_loss:.4f}_mses-{float(np.mean(train_mse_list)):.4f}_val_mse-{val_mse:.4f}-train_full_pixel_auroc-{train_valid_full_pixel_instance_auroc:.4f}_valid_full_pixel_auroc-{valid_full_pixel_instance_auroc:.4f}')
             save_model_train_sub_dir_path = os.path.join(save_model_sub_dir_path, 'train_generated_images')
             draw_image.draw_image(image_batch[1].numpy(), train_generated_images.numpy(), save_model_train_sub_dir_path)
+
             save_model_val_sub_dir_path = os.path.join(save_model_sub_dir_path, 'val_generated_images')
             draw_image.draw_image(valid_dataset[1].numpy(), val_generated_images.numpy(), save_model_val_sub_dir_path)
+
+            _, _, auroc_train_valid_inf_image_array = test_step(auroc_train_valid_raw_image_array, auroc_valid_raw_image_array)
+            save_model_train_val_anomaly_sub_dir_path = os.path.join(save_model_sub_dir_path, 'train_val_anomaly_generated_images')
+            draw_image.draw_image(auroc_train_valid_raw_image_array, auroc_train_valid_inf_image_array.numpy(), save_model_train_val_anomaly_sub_dir_path)
+
+
+            _, _, auroc_valid_inf_image_array = test_step(auroc_valid_raw_image_array, auroc_valid_raw_image_array)
+            save_model_val_anomaly_sub_dir_path = os.path.join(save_model_sub_dir_path, 'val_anomaly_generated_images')
+            draw_image.draw_image(auroc_valid_raw_image_array, auroc_valid_inf_image_array.numpy(), save_model_val_anomaly_sub_dir_path)
 
             # save model
             all_model.save(os.path.join(save_model_sub_dir_path, 'all_model'))
@@ -171,7 +181,7 @@ if __name__ == '__main__':
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--image_height', type=int, default=224)
     parser.add_argument('--image_width', type=int, default=224)
-    parser.add_argument('--latent_dim', type=int, default=196)
+    parser.add_argument('--latent_dim', type=int, default=16)
     parser.add_argument('--test_max_sample', type=int, default=100)
     parser.add_argument('--output_dir_path', type=str, default='~/.vaik_anomaly_pb_trainer/output')
     args = parser.parse_args()
