@@ -3,6 +3,7 @@ import argparse
 from datetime import datetime
 import pytz
 import tensorflow as tf
+import numpy as np
 import tqdm
 
 gpus = tf.config.list_physical_devices('GPU')
@@ -109,15 +110,19 @@ def train(train_image_dir_path, test_image_dir_path,
 
     for epoch in range(epoch_size):
         with tqdm.tqdm(range(step_size), unit="steps") as monitor_tqdm:
+            train_loss_list = []
+            train_mse_list = []
             for step in monitor_tqdm:
                 # train
                 monitor_tqdm.set_description(f"Epoch {epoch}")
                 image_batch = next(train_dataset)
                 train_loss, train_mse, train_generated_images = train_step(image_batch[0], image_batch[1])
-                monitor_tqdm.set_postfix(loss=float(train_loss), mse=float(train_mse))
+                train_loss_list.append(train_loss)
+                train_mse_list.append(train_mse)
+                monitor_tqdm.set_postfix(loss=float(np.mean(train_loss_list)), mse=float(np.mean(train_mse_list)))
             # valid
             val_loss, val_mse, val_generated_images = test_step(valid_dataset[0], valid_dataset[1])
-            print(f'testing, val_loss:{float(val_loss)}, val_mse:{float(val_mse)}')
+            print(f'val_loss:{float(val_loss):.4f}, val_mse:{float(val_mse):.4f}')
 
             # calc auroc
             auroc_train_valid_inf_image_array = test_auroc_step(auroc_train_valid_raw_image_array)
