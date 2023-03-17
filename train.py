@@ -145,7 +145,7 @@ def train(train_image_dir_path, test_image_dir_path,
 
             # draw image
             save_model_sub_dir_path = os.path.join(save_model_dir_path,
-                                                   f'epoch-{epoch:04d}_steps-{step_size}_batch-{batch_size}_loss-{float(np.mean(train_loss_list)):.4f}_val_loss-{val_loss:.4f}-train_full_pixel_auroc-{train_valid_full_pixel_instance_auroc:.4f}_valid_full_pixel_auroc-{valid_full_pixel_instance_auroc:.4f}')
+                                                   f'epoch-{epoch:04d}_steps-{step_size}_batch-{batch_size}_loss-{float(np.mean(train_loss_list)):.4f}_val_loss-{val_loss:.4f}_mses-{float(np.mean(train_mse_list)):.4f}_val_mse-{val_mse:.4f}-train_full_pixel_auroc-{train_valid_full_pixel_instance_auroc:.4f}_valid_full_pixel_auroc-{valid_full_pixel_instance_auroc:.4f}')
             save_model_train_sub_dir_path = os.path.join(save_model_sub_dir_path, 'train_generated_images')
             draw_image.draw_image(image_batch[1].numpy(), train_generated_images.numpy(), save_model_train_sub_dir_path)
             save_model_val_sub_dir_path = os.path.join(save_model_sub_dir_path, 'val_generated_images')
