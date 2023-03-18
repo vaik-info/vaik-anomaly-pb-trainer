@@ -9,7 +9,7 @@ import tensorflow_addons as tfa
 import numpy as np
 
 
-def read_image_dir(input_dir_path, target_shape: Tuple[int, int, int] = (256, 256, 1)):
+def read_image_dir(input_dir_path, target_shape: Tuple[int, int, int] = (256, 256, 3)):
     image_path_list = []
     for file in ('*.jpg', '*.jpeg', '*.png', '*.JPG', '*.JPEG', '*.PNG'):
         image_path_list.extend(glob.glob(os.path.join(input_dir_path, '**', f'{file}'), recursive=True))
@@ -25,8 +25,11 @@ def read_image_dir(input_dir_path, target_shape: Tuple[int, int, int] = (256, 25
     return image_array, padding_bottom_right_list, org_image_shape_list, image_path_list
 
 
-def read_image(image_path: str, target_shape: Tuple[int, int] = (256, 256)):
-    pil_image = Image.open(image_path).convert('L')
+def read_image(image_path: str, target_shape: Tuple[int, int] = (256, 256, 3)):
+    if len(target_shape) == 3 and target_shape[-1] == 3:
+        pil_image = Image.open(image_path).convert('RGB')
+    else:
+        pil_image = Image.open(image_path).convert('L')
     pil_image, padding_bottom_right, org_image_shape = __resize_and_pad(pil_image, target_shape)
     np_image = np.asarray(pil_image)
     np_image = np.expand_dims(np_image, axis=-1) if len(np_image.shape)==2 else np_image

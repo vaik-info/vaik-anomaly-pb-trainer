@@ -16,16 +16,18 @@ def prepare_inf_gt_images(raw_image_dir_path, gt_image_dir_path, target_shape):
 
     raw_image_list = []
     gt_image_list = []
+    category_list = []
     for raw_image_path in raw_image_path_list:
         category = raw_image_path.split('/')[-2]
         raw_image_list.append(ops.read_image(raw_image_path, target_shape)[0])
+        category_list.append(category)
         if category != 'good':
             gt_image_path_list = glob.glob(os.path.join(gt_image_dir_path, category, os.path.basename(raw_image_path).replace('.', '_mask.')))
             gt_image_path = gt_image_path_list[0]
-            gt_image_list.append(ops.read_image(gt_image_path, target_shape)[0])
+            gt_image_list.append(ops.read_image(gt_image_path, (target_shape[0], target_shape[1]))[0])
         else:
-            gt_image_list.append(np.zeros(raw_image_list[-1].shape, dtype=raw_image_list[-1].dtype))
-    return np.asarray(raw_image_list), np.asarray(gt_image_list)
+            gt_image_list.append(np.zeros((raw_image_list[-1].shape[0], raw_image_list[-1].shape[1], 1), dtype=raw_image_list[-1].dtype))
+    return np.asarray(raw_image_list), np.asarray(gt_image_list), category_list
 
 def instance_auroc_mean(inf_raw_image_list, gt_image_list):
     gt_labels = [np.max(gt_image) > 125 for gt_image in gt_image_list]

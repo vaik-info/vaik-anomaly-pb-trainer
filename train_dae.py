@@ -3,6 +3,7 @@ import argparse
 from datetime import datetime
 import pytz
 import tensorflow as tf
+import tensorflow_addons as tfa
 import numpy as np
 import tqdm
 import cv2
@@ -19,7 +20,7 @@ if gpus:
 
 from data import anomaly_dataset
 import albumentations as A
-from models import cvae_encoder, cvae_sampler, cvae_decoder
+from models import dae
 from losses import vae_loss
 from callbacks import draw_image, calc_auroc
 
@@ -35,9 +36,15 @@ def train(train_image_dir_path, test_image_dir_path,
     transform = A.Compose([
         A.ShiftScaleRotate(always_apply=True)
     ])
+
+    noize_transform = A.Compose([
+        A.GaussNoise(),
+        A.ISONoise(),
+        A.Cutout(num_holes=16, max_h_size=32, max_w_size=32)
+    ])
     ## train
     TrainDataset = type(f'TrainDataset', (anomaly_dataset.AnomalyDataset,), dict())
-    train_dataset = TrainDataset(train_image_dir_path, input_shape, transform)
+    train_dataset = TrainDataset(train_image_dir_path, input_shape, transform, noize_transform)
     train_dataset = iter(train_dataset.padded_batch(batch_size=batch_size, padding_values=(
         tf.constant(0, dtype=tf.uint8), tf.constant(0, dtype=tf.uint8))))
 
@@ -54,19 +61,11 @@ def train(train_image_dir_path, test_image_dir_path,
 
     # Prepare Model
     ## encoder
-    encoder_model, shape_before_flattening, (z_mean, z_log_var) = cvae_encoder.prepare(input_shape,
-                                                                                       latent_dim=latent_dim)
-    ## sampler
-    sampler_model, z = cvae_sampler.prepare(mean_input=z_mean, log_var_input=z_log_var)
-    ## decoder
-    decoder_model, outputs = cvae_decoder.decoder(z, shape_before_flattening, input_shape)
-    ## all_model
-    all_model = tf.keras.Model(encoder_model.inputs, outputs)
-    all_model.summary()
+    dae_model = dae.prepare(input_shape)
+    dae_model.summary()
 
     ## optimizer
-    encoder_optimizer = tf.keras.optimizers.Adam(learning_rate=0.0005)
-    decoder_optimizer = tf.keras.optimizers.Adam(learning_rate=0.0005)
+    optimizer = tf.keras.optimizers.Adam(learning_rate=0.0005)
 
     save_model_dir_path = os.path.join(output_dir_path,
                                        f'{datetime.now(pytz.timezone("Asia/Tokyo")).strftime("%Y-%m-%d-%H-%M-%S")}')
@@ -75,37 +74,28 @@ def train(train_image_dir_path, test_image_dir_path,
     @tf.function
     def train_step(input_images, output_images):
         with tf.GradientTape() as encoder, tf.GradientTape() as decoder:
-            mean, log_var = encoder_model(input_images, training=True)
-            latent = sampler_model([mean, log_var])
-            generated_images = decoder_model(latent, training=True)
+            generated_images = dae_model(input_images, training=True)
 
-            loss = vae_loss.vae_loss(output_images, generated_images, mean, log_var)
+            loss =tfa.losses.sigmoid_focal_crossentropy(tf.cast(output_images, tf.float32) / 255., generated_images)
             mse = tf.keras.metrics.mse(tf.cast(output_images, tf.float32) / 255., generated_images)
 
-        gradients_of_enc = encoder.gradient(loss, encoder_model.trainable_variables)
-        gradients_of_dec = decoder.gradient(loss, decoder_model.trainable_variables)
-
-        encoder_optimizer.apply_gradients(zip(gradients_of_enc, encoder_model.trainable_variables))
-        decoder_optimizer.apply_gradients(zip(gradients_of_dec, decoder_model.trainable_variables))
+        gradients_of_enc = encoder.gradient(loss, dae_model.trainable_variables)
+        optimizer.apply_gradients(zip(gradients_of_enc, dae_model.trainable_variables))
         return tf.reduce_mean(loss), tf.reduce_mean(mse), generated_images
 
     # test
     @tf.function
     def test_step(input_images, output_images):
-        mean, log_var = encoder_model(input_images, training=True)
-        latent = sampler_model([mean, log_var])
-        generated_images = decoder_model(latent, training=True)
+        generated_images = dae_model(input_images, training=True)
 
-        loss = vae_loss.vae_loss(output_images, generated_images, mean, log_var)
+        loss =tfa.losses.sigmoid_focal_crossentropy(tf.cast(output_images, tf.float32) / 255., generated_images)
         mse = tf.keras.metrics.mse(tf.cast(output_images, tf.float32) / 255., generated_images)
         return tf.reduce_mean(loss), tf.reduce_mean(mse), generated_images
 
     # test
     @tf.function
     def test_auroc_step(input_images):
-        mean, log_var = encoder_model(input_images, training=True)
-        latent = sampler_model([mean, log_var])
-        generated_images = decoder_model(latent, training=True)
+        generated_images = dae_model(input_images, training=True)
         mse = tf.keras.metrics.mse(tf.cast(input_images, tf.float32) / 255., generated_images)
         return mse
 
@@ -145,15 +135,15 @@ def train(train_image_dir_path, test_image_dir_path,
             draw_image.draw_image(image_batch[1].numpy(), train_generated_images.numpy(), save_model_train_sub_dir_path)
 
             save_model_val_sub_dir_path = os.path.join(save_model_sub_dir_path, 'val_generated_images')
-            draw_image.draw_image(valid_dataset[1].numpy(), val_generated_images.numpy(), save_model_val_sub_dir_path, auroc_valid_category_list)
+            draw_image.draw_image(valid_dataset[1].numpy(), val_generated_images.numpy(), save_model_val_sub_dir_path)
 
 
             _, _, auroc_valid_inf_image_array = test_step(auroc_valid_raw_image_array, auroc_valid_raw_image_array)
             save_model_val_anomaly_sub_dir_path = os.path.join(save_model_sub_dir_path, 'val_anomaly_generated_images')
-            draw_image.draw_image(auroc_valid_raw_image_array, auroc_valid_inf_image_array.numpy(), save_model_val_anomaly_sub_dir_path)
+            draw_image.draw_image(auroc_valid_raw_image_array, auroc_valid_inf_image_array.numpy(), save_model_val_anomaly_sub_dir_path, auroc_valid_category_list)
 
             # save model
-            all_model.save(os.path.join(save_model_sub_dir_path, 'all_model'))
+            dae_model.save(os.path.join(save_model_sub_dir_path, 'dae_model'))
 
 
 if __name__ == '__main__':
@@ -164,7 +154,7 @@ if __name__ == '__main__':
     parser.add_argument('--auroc_valid_gt_image_dir_path', type=str,
                         default='~/.vaik-mnist-anomaly-dataset/valid/ground_truth')
     parser.add_argument('--epoch_size', type=int, default=1000)
-    parser.add_argument('--step_size', type=int, default=200)
+    parser.add_argument('--step_size', type=int, default=500)
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--image_height', type=int, default=224)
     parser.add_argument('--image_width', type=int, default=224)
