@@ -20,7 +20,8 @@ def prepare_inf_gt_images(raw_image_dir_path, gt_image_dir_path, target_shape):
         category = raw_image_path.split('/')[-2]
         raw_image_list.append(ops.read_image(raw_image_path, target_shape)[0])
         if category != 'good':
-            gt_image_path = glob.glob(os.path.join(gt_image_dir_path, category, os.path.basename(raw_image_path)))[0]
+            gt_image_path_list = glob.glob(os.path.join(gt_image_dir_path, category, os.path.basename(raw_image_path).replace('.', '_mask.')))
+            gt_image_path = gt_image_path_list[0]
             gt_image_list.append(ops.read_image(gt_image_path, target_shape)[0])
         else:
             gt_image_list.append(np.zeros(raw_image_list[-1].shape, dtype=raw_image_list[-1].dtype))
