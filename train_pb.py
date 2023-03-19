@@ -17,7 +17,7 @@ if gpus:
         print(e)
 
 from data import ae_dataset
-from models import cvae_encoder, cvae_sampler, cvae_decoder
+from models import cvae_encoder, cvae_sampler, cvae_const_sampler, cvae_decoder, cvae_mse_decoder
 from losses import vae_loss
 from callbacks import calc_auroc
 
@@ -52,11 +52,19 @@ def train(train_image_dir_path, test_good_image_dir_path, test_anomaly_image_dir
                                                                                        latent_dim=latent_dim)
     ## sampler
     sampler_model, z = cvae_sampler.prepare(mean_input=z_mean, log_var_input=z_log_var)
+    sampler_const_model, z_const = cvae_const_sampler.prepare(mean_input=z_mean, log_var_input=z_log_var)
+    ### const sampler
+    encoder_sampler_model = tf.keras.Model(encoder_model.inputs, z_const)
+
     ## decoder
     decoder_model, outputs = cvae_decoder.decoder(z, shape_before_flattening, input_shape)
+
     ## all_model
     all_model = tf.keras.Model(encoder_model.inputs, outputs)
     all_model.summary()
+
+    ## mse_model
+    mse_model = cvae_mse_decoder.prepare(encoder_model.inputs[0], outputs)
 
     ## optimizer
     encoder_optimizer = tf.keras.optimizers.Adam(learning_rate=0.0005)
@@ -137,6 +145,9 @@ def train(train_image_dir_path, test_good_image_dir_path, test_anomaly_image_dir
                                                    f'mse-{float(train_mse):.4f}-val_mse-{float(val_mse):.4f}_val_anomaly_mse-{float(val_anomaly_mse):.4f}_'
                                                    f'val_auroc_mean-{float(val_auroc_mean):.4f}')
             os.makedirs(save_model_sub_dir_path, exist_ok=True)
+
+            mse_model.save(os.path.join(save_model_sub_dir_path, 'mse_model'))
+            encoder_sampler_model.save(os.path.join(save_model_sub_dir_path, 'encoder_sampler_model'))
             all_model.save(os.path.join(save_model_sub_dir_path, 'all_model'))
 
 
@@ -147,13 +158,13 @@ if __name__ == '__main__':
     parser.add_argument('--test_anomaly_image_dir_path', type=str,
                         default='~/.vaik-mnist-anomaly-dataset/valid/anomaly')
     parser.add_argument('--epoch_size', type=int, default=1000)
-    parser.add_argument('--step_size', type=int, default=1000)
-    parser.add_argument('--batch_size', type=int, default=16)
+    parser.add_argument('--step_size', type=int, default=5000)
+    parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--image_height', type=int, default=224)
     parser.add_argument('--image_width', type=int, default=224)
-    parser.add_argument('--latent_dim', type=int, default=3)
+    parser.add_argument('--latent_dim', type=int, default=16)
     parser.add_argument('--test_max_sample', type=int, default=100)
-    parser.add_argument('--output_dir_path', type=str, default='~/.vaik_anomaly_pb_trainer/output')
+    parser.add_argument('--output_dir_path', type=str, default='~/.vaik_anomaly_pb_trainer/output_model')
     args = parser.parse_args()
 
     args.train_image_dir_path = os.path.expanduser(args.train_image_dir_path)
