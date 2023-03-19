@@ -136,7 +136,7 @@ def train(train_image_dir_path, test_good_image_dir_path, test_anomaly_image_dir
                                                    f'epoch-{epoch:04d}_steps-{step_size}_batch-{batch_size}_'
                                                    f'loss-{float(train_loss):.4f}_val_loss-{float(val_loss):.4f}_val_anomaly_loss-{float(val_anomaly_loss):.4f}_'
                                                    f'mse-{float(train_mse):.4f}-val_mse-{float(val_mse):.4f}_val_anomaly_mse-{float(val_anomaly_mse):.4f}_'
-                                                   f'val_auroc_mean-{float(val_auroc_mean)}_val_auroc_max-{float(val_auroc_max)}')
+                                                   f'val_auroc_mean-{float(val_auroc_mean):.4f}_val_auroc_max-{float(val_auroc_max)}:.4f')
             os.makedirs(save_model_sub_dir_path, exist_ok=True)
             all_model.save(os.path.join(save_model_sub_dir_path, 'all_model'))
 
@@ -150,7 +150,7 @@ if __name__ == '__main__':
     parser.add_argument('--test_anomaly_image_dir_path', type=str,
                         default='~/.vaik-mnist-anomaly-dataset/valid/anomaly')
     parser.add_argument('--epoch_size', type=int, default=1000)
-    parser.add_argument('--step_size', type=int, default=2000)
+    parser.add_argument('--step_size', type=int, default=1000)
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--image_height', type=int, default=224)
     parser.add_argument('--image_width', type=int, default=224)
