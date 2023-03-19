@@ -19,7 +19,7 @@ if gpus:
 from data import ae_dataset
 from models import cvae_encoder, cvae_sampler, cvae_decoder
 from losses import vae_loss
-from callbacks import draw_image, calc_auroc
+from callbacks import calc_auroc
 
 
 def train(train_image_dir_path, test_good_image_dir_path, test_anomaly_image_dir_path,
@@ -139,8 +139,6 @@ def train(train_image_dir_path, test_good_image_dir_path, test_anomaly_image_dir
             os.makedirs(save_model_sub_dir_path, exist_ok=True)
             all_model.save(os.path.join(save_model_sub_dir_path, 'all_model'))
 
-            output_draw_dir_path = os.path.join(save_model_sub_dir_path, 'draw_image')
-            draw_image.draw_image(valid_good_data[0].numpy(), val_generated_images, val_mse_array, valid_anomaly_data[0].numpy(), val_anomaly_generated_images, val_anomaly_mse_array, output_draw_dir_path)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='train pb')
