@@ -11,5 +11,5 @@ def kl_loss(mean, log_var):
                                        axis=1)
 
 
-def vae_loss(y_true, y_pred, mean, var):
-    return mse_loss(tf.cast(y_true, tf.float32) / 255., y_pred) + kl_loss(mean, var)
+def vae_loss(y_true, y_pred, y_inf, mean, var):
+    return ((mse_loss(tf.cast(y_true, tf.float32) / 255., y_pred) + mse_loss(tf.cast(y_true, tf.float32) / 255., y_inf)) / 2 ) + kl_loss(mean, var)
