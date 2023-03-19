@@ -87,17 +87,17 @@ def train(mse_model_dir_path, encoder_model_dir_path, train_image_dir_path, test
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='train faiss')
     parser.add_argument('--mse_model_dir_path', type=str,
-                        default='/home/kentaro/.vaik_anomaly_pb_trainer/output_model/2023-03-19-21-55-35/epoch-0016_steps-1000_batch-16_loss-26.2637_val_loss-25.9032_val_anomaly_loss-54.6594_mse-0.0138-val_mse-0.0145_val_anomaly_mse-0.0384_val_auroc_mean-0.9600/mse_model')
+                        default='/home/kentaro/.vaik_anomaly_pb_trainer/output_model/2023-03-19-22-34-13/epoch-0000_steps-5000_batch-32_loss-26.2969_val_loss-26.4182_val_anomaly_loss-55.7028_mse-0.0139-val_mse-0.0146_val_anomaly_mse-0.0397_val_auroc_mean-0.9693/mse_model')
     parser.add_argument('--encoder_model_dir_path', type=str,
-                        default='/home/kentaro/.vaik_anomaly_pb_trainer/output_model/2023-03-19-21-55-35/epoch-0016_steps-1000_batch-16_loss-26.2637_val_loss-25.9032_val_anomaly_loss-54.6594_mse-0.0138-val_mse-0.0145_val_anomaly_mse-0.0384_val_auroc_mean-0.9600/encoder_sampler_model')
+                        default='/home/kentaro/.vaik_anomaly_pb_trainer/output_model/2023-03-19-22-34-13/epoch-0000_steps-5000_batch-32_loss-26.2969_val_loss-26.4182_val_anomaly_loss-55.7028_mse-0.0139-val_mse-0.0146_val_anomaly_mse-0.0397_val_auroc_mean-0.9693/encoder_sampler_model')
     parser.add_argument('--train_image_dir_path', type=str, default='~/.vaik-mnist-anomaly-dataset/train/good')
     parser.add_argument('--test_good_image_dir_path', type=str, default='~/.vaik-mnist-anomaly-dataset/valid/good')
     parser.add_argument('--test_anomaly_image_dir_path', type=str,
                         default='~/.vaik-mnist-anomaly-dataset/valid/anomaly')
     parser.add_argument('--total_sample_num', type=int, default=4000)
     parser.add_argument('--sample_ratio', type=int, default=0.01)
-    parser.add_argument('--max_distance_ratio', type=int, default=0.2)
-    parser.add_argument('--random_ratio', type=int, default=0.1)
+    parser.add_argument('--max_distance_ratio', type=int, default=0.1)
+    parser.add_argument('--random_ratio', type=int, default=0.2)
     parser.add_argument('--batch_size', type=int, default=40)
     parser.add_argument('--output_file_path', type=str, default='~/.vaik_anomaly_pb_trainer/output_faiss/output.faiss')
     args = parser.parse_args()
