@@ -141,7 +141,7 @@ def train(train_image_dir_path, test_good_image_dir_path, test_anomaly_image_dir
             all_model.save(os.path.join(save_model_sub_dir_path, 'all_model'))
 
             output_draw_dir_path = os.path.join(save_model_sub_dir_path, 'draw_image')
-            draw_image.draw_image(val_generated_images, val_mse_array, val_anomaly_generated_images, val_anomaly_mse_array, output_draw_dir_path)
+            draw_image.draw_image(valid_good_data[0], val_generated_images, val_mse_array, valid_anomaly_data[0], val_anomaly_generated_images, val_anomaly_mse_array, output_draw_dir_path)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='train pb')
@@ -150,7 +150,7 @@ if __name__ == '__main__':
     parser.add_argument('--test_anomaly_image_dir_path', type=str,
                         default='~/.vaik-mnist-anomaly-dataset/valid/anomaly')
     parser.add_argument('--epoch_size', type=int, default=1000)
-    parser.add_argument('--step_size', type=int, default=2000)
+    parser.add_argument('--step_size', type=int, default=20)
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--image_height', type=int, default=224)
     parser.add_argument('--image_width', type=int, default=224)
