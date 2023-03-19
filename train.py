@@ -141,7 +141,7 @@ def train(train_image_dir_path, test_good_image_dir_path, test_anomaly_image_dir
             all_model.save(os.path.join(save_model_sub_dir_path, 'all_model'))
 
             output_draw_dir_path = os.path.join(save_model_sub_dir_path, 'draw_image')
-            draw_image.draw_image(valid_good_data[0], val_generated_images, val_mse_array, valid_anomaly_data[0], val_anomaly_generated_images, val_anomaly_mse_array, output_draw_dir_path)
+            draw_image.draw_image(valid_good_data[0].numpy(), val_generated_images, val_mse_array, valid_anomaly_data[0].numpy(), val_anomaly_generated_images, val_anomaly_mse_array, output_draw_dir_path)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='train pb')
@@ -154,7 +154,7 @@ if __name__ == '__main__':
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--image_height', type=int, default=224)
     parser.add_argument('--image_width', type=int, default=224)
-    parser.add_argument('--latent_dim', type=int, default=64)
+    parser.add_argument('--latent_dim', type=int, default=3)
     parser.add_argument('--test_max_sample', type=int, default=100)
     parser.add_argument('--output_dir_path', type=str, default='~/.vaik_anomaly_pb_trainer/output')
     args = parser.parse_args()
