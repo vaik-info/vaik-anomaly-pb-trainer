@@ -93,10 +93,10 @@ if __name__ == '__main__':
     parser.add_argument('--test_anomaly_image_dir_path', type=str,
                         default='~/.vaik-mnist-anomaly-dataset/valid/anomaly')
     parser.add_argument('--total_sample_num', type=int, default=4000)
-    parser.add_argument('--sample_ratio', type=int, default=0.25)
-    parser.add_argument('--max_distance_ratio', type=int, default=0.05)
+    parser.add_argument('--sample_ratio', type=int, default=0.01)
+    parser.add_argument('--max_distance_ratio', type=int, default=0.2)
     parser.add_argument('--random_ratio', type=int, default=0.1)
-    parser.add_argument('--batch_size', type=int, default=8)
+    parser.add_argument('--batch_size', type=int, default=40)
     parser.add_argument('--output_file_path', type=str, default='~/.vaik_anomaly_pb_trainer/output_faiss/output.faiss')
     args = parser.parse_args()
 
