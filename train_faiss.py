@@ -52,6 +52,9 @@ def train(mse_model_dir_path, encoder_model_dir_path, train_image_dir_path, test
     valid_anomaly_data = next(iter(valid_anomaly_dataset.padded_batch(batch_size=100, padding_values=(
         tf.constant(0, dtype=tf.uint8), tf.constant(0, dtype=tf.uint8)))))
 
+    auroc = calc_auroc.instance_auroc_mean(mse_model.predict(valid_good_data[0], batch_size), mse_model.predict(valid_anomaly_data[0], batch_size))
+    print(auroc)
+
 
     for train_good_data in train_good_dataset:
         mse_array = mse_model.predict(train_good_data[0], batch_size)
@@ -77,7 +80,6 @@ def train(mse_model_dir_path, encoder_model_dir_path, train_image_dir_path, test
 
     good_scores = inference(encoder_model, valid_good_data[0], memory_block_model, batch_size)
     anomaly_scores = inference(encoder_model, valid_anomaly_data[0], memory_block_model, batch_size)
-
     auroc = calc_auroc.instance_auroc_mean(good_scores, anomaly_scores)
     print(auroc)
 
