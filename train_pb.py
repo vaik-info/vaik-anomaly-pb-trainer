@@ -89,9 +89,9 @@ def train(train_image_dir_path, test_good_image_dir_path, test_anomaly_image_dir
     # test
     @tf.function
     def test_step(input_images, output_images):
-        mean, log_var = encoder_model(input_images, training=True)
+        mean, log_var = encoder_model(input_images, training=False)
         latent = sampler_model([mean, log_var])
-        generated_images = decoder_model(latent, training=True)
+        generated_images = decoder_model(latent, training=False)
 
         loss = vae_loss.vae_loss(output_images, generated_images, mean, log_var)
         mse_array = tf.math.squared_difference(generated_images, tf.cast(output_images, tf.float32) / 255.)
@@ -100,9 +100,9 @@ def train(train_image_dir_path, test_good_image_dir_path, test_anomaly_image_dir
     # test
     @tf.function
     def test_auroc_step(input_images):
-        mean, log_var = encoder_model(input_images, training=True)
+        mean, log_var = encoder_model(input_images, training=False)
         latent = sampler_model([mean, log_var])
-        generated_images = decoder_model(latent, training=True)
+        generated_images = decoder_model(latent, training=False)
         mse = tf.keras.metrics.mse(tf.cast(input_images, tf.float32) / 255., generated_images)
         return mse
 
