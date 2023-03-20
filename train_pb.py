@@ -58,7 +58,7 @@ def train(train_image_dir_path, test_good_image_dir_path, test_anomaly_image_dir
 
 
     ## all_model
-    all_model = mse_decoder.prepare(encoder_model.inputs, outputs)
+    all_model = mse_decoder.prepare(encoder_model.inputs[0], outputs)
     all_model.summary()
 
     ## optimizer
