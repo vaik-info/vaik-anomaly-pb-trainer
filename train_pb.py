@@ -157,7 +157,7 @@ if __name__ == '__main__':
     parser.add_argument('--image_width', type=int, default=224)
     parser.add_argument('--latent_dim', type=int, default=16)
     parser.add_argument('--test_max_sample', type=int, default=100)
-    parser.add_argument('--output_dir_path', type=str, default='~/.vaik_anomaly_pb_trainer/output_model')
+    parser.add_argument('--output_dir_path', type=str, default='~/.vaik_anomaly_pb_trainer/output')
     args = parser.parse_args()
 
     args.train_image_dir_path = os.path.expanduser(args.train_image_dir_path)
