@@ -140,7 +140,6 @@ def train(train_image_dir_path, test_good_image_dir_path, test_anomaly_image_dir
                                                    f'val_auroc_mean-{float(val_auroc_mean):.4f}')
             os.makedirs(save_model_sub_dir_path, exist_ok=True)
 
-            encoder_sampler_model.save(os.path.join(save_model_sub_dir_path, 'encoder_sampler_model'))
             all_model.save(os.path.join(save_model_sub_dir_path, 'all_model'))
 
 
