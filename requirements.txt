@@ -2,6 +2,5 @@ tensorflow==2.11.0
 Pillow>=9.1.1
 pytz>=2022.6
 tqdm>=4.64.1
-tf-models-official==2.11.3
 scikit-learn>=1.2.1
-faiss-cpu==1.7.2
+tf2onnx>=1.13.0

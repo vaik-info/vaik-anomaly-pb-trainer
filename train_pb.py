@@ -17,7 +17,7 @@ if gpus:
         print(e)
 
 from data import ae_dataset
-from models import cvae_encoder, cvae_sampler, cvae_decoder
+from models import cvae_encoder, cvae_sampler, cvae_decoder, mse_decoder
 from losses import vae_loss
 from callbacks import calc_auroc
 
@@ -56,8 +56,9 @@ def train(train_image_dir_path, test_good_image_dir_path, test_anomaly_image_dir
     ## decoder
     decoder_model, outputs = cvae_decoder.decoder(z, shape_before_flattening, input_shape)
 
+
     ## all_model
-    all_model = tf.keras.Model(encoder_model.inputs, outputs)
+    all_model = mse_decoder.prepare(encoder_model.inputs, outputs)
     all_model.summary()
 
     ## optimizer
